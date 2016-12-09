@@ -8,6 +8,7 @@ import (
 	"testing"
 
 	N "github.com/OneOfOne/xxhash"
+	"github.com/dchest/siphash"
 )
 
 const inS = `Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
@@ -212,4 +213,20 @@ func BenchmarkFnv64MultiWrites(b *testing.B) {
 		bv += h.Sum64()
 		h.Reset()
 	}
+}
+
+func hash_builder(seed1, seed2 uint64) func([]byte) uint64 {
+	return func(msg []byte) uint64 {
+		return siphash.Hash(seed1, seed2, msg)
+	}
+}
+
+func BenchMarkSipHash(b *testing.B) {
+	hf := hash_builder(7, 13)
+	var bv uint64
+
+	for i := 0; i < b.N; i++ {
+		bv += hf(in)
+	}
+
 }
